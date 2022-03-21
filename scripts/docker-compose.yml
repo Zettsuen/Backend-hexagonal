@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  community-mariadb:
+    ports:
+      - "127.0.0.1:3306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+    volumes:
+      - ../ccdb-storage:/var/lib/mysql
+    image: "mariadb:10.5"
+  community-mongodb:
+    ports:
+      - "127.0.0.1:27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - ../comdb-storage:/data/db
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo "Dumbpassword" > /data/key
+        chmod 400 /data/key
+        chown 999:999 /data/key
+        exec docker-entrypoint.sh $$@
+    command: "mongod --replSet rs0 --keyFile /data/key"
+    image: "mongo:4.4.6"

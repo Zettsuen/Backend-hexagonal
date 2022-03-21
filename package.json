@@ -1,0 +1,23 @@
+{
+  "name": "nectios-backend",
+  "version": "1.0.0",
+  "description": "New nectios backend with nodejs Typescript",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./dist/community.js",
+    "build": "prisma generate && webpack --config webpack.config.js",
+    "serve": "node ./scripts/devEnviroment.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@prisma/client": "^3.11.0",
+    "@types/express": "^4.17.13",
+    "express": "^4.17.3",
+    "prisma": "^3.11.0",
+    "ts-loader": "^9.2.8",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
+  }
+}

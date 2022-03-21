@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Community {
+  id Int @unique @default(autoincrement())
+  key String @unique
+  slug String @unique
+  subdomain String?
+  name String
+  headline String?
+  description String?
+  logo_url String?
+  bg_url String?
+  version Int @default(0)
+  level Int?
+  layout String?
+  customization String?
+  menu String?
+  about Json?
+  header Json?
+  footer Json?
+  google_tag_manager Json?
+  head_meta Json?
+  emails String?
+  phones String?
+  links String?
+  locations String?
+  main_type_id Int @default(0)
+  type_id Int?
+  status_id Int?
+  available_languages String?
+  default_language_id Int @default(15)
+  timezone_id Int @default(60)
+  is_section Boolean @default(false)
+  is_event Boolean @default(false)
+  is_course Boolean @default(false)
+  modality Int?
+  registration_url String?
+  registration_start_date DateTime?
+  registration_end_date DateTime?
+  opening_date DateTime?
+  start_date DateTime?
+  end_date DateTime?
+  closing_date DateTime?
+  landing String?
+  visibility Int @default(0)
+  accessibility Int @default(0)
+  in_maintenance Boolean @default(false)
+  parent_id Int?
+  main_community_id Int?
+  membership_community_id Int?
+  staff_can_access Boolean @default(true)
+  show_chatbot Boolean @default(true)
+  custom_chatbot String?
+  score Int?
+  order Int?
+  collective_id Int?
+  workspace_id Int?
+  created_by_user_id Int?
+  created_at DateTime
+  updated_at DateTime
+  deleted_at DateTime?
+  temporary_show_v2form Boolean @default(false)
+
+  @@map("communities")
+}
