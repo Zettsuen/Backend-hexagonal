@@ -4,8 +4,6 @@ const prisma = new PrismaClient();
 
 export const getCommunities = async (options:any) => {
     
-    console.log(options)
-
     const result = await prisma.community.findFirst(options);
 
     const rCount = await prisma.community.count({
