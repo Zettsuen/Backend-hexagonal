@@ -13,13 +13,15 @@ export function Authorized(req: Request, res: Response, next: NextFunction) {
             }
             const bearer = req.headers.authorization.substring(7);
             if (process.env.ENV === "DEV") {
-                const jwt = JWT.decode(bearer);
+                const jwt = JWT.decode(bearer) as DecodedJWT;
                 if (!jwt) {
                     res.setHeader("WWW-Authenticate", "Bearer realm=\"Copernic OAuth\", error=\"invalid_token\"")
                         .sendStatus(403);
                     return;
                 }
-                req.body.userID = jwt as DecodedJWT;
+
+                req.body.userID = jwt.sub;
+                
                 next();
             } else {
                 const publicKey:JWT.Secret = process.env.PUBLICKEY || ""
@@ -30,7 +32,9 @@ export function Authorized(req: Request, res: Response, next: NextFunction) {
                         res.status(403);
                     } else {
                         
-                        req.body.userID = jwt as DecodedJWT;
+                        jwt = jwt as DecodedJWT;
+                        req.body.userID = jwt.sub;
+                        
                         next();
                     }
                 })

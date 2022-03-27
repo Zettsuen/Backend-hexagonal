@@ -1,17 +1,17 @@
 import { Request, Response } from "express";
-import { getCommunities } from '../helpers/communities';
 import { dataRenderer } from "../utils/dataRenderer";
-import { Communities } from '../services/community/communities';
+import { Members } from '../services/members/members';
+import { getMembers } from '../helpers/members';
 
 
-export const handleGetCommunities = async (req: Request, res: Response) => {
+export const handleGetMembers = async (req: Request, res: Response) => {
 
     try {
         const requestData = req.body;
 
-        const conditions = new Communities(requestData).getCommunityParams();
+        const conditions = new Members(requestData).getMembersParams();
 
-        const responseData: any = await getCommunities(conditions);
+        const responseData: any = await getMembers(conditions);
 
         res.json({ data: dataRenderer(responseData[0]), total: responseData[1] });
 

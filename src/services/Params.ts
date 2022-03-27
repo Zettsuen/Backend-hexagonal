@@ -5,6 +5,7 @@ export class ParamConfigs {
         public skip: any;
         public take: any;
         public orderBy: any = {};
+        public data: any = {};
         public requestData: any;
     
         constructor(requestData: any) {

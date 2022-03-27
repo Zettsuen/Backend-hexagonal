@@ -1,4 +1,4 @@
-const { toCamelCase} = require('js-convert-case');
+const { toCamelCase } = require('js-convert-case');
 
 
 /*
@@ -6,87 +6,131 @@ const { toCamelCase} = require('js-convert-case');
     de dato inicial que reciba hará una acción u otra para poder tratarlo. Una vez está tratando el tipo de dato principal
     hara lo siguiente:
     
-    1 - Convertir los parametros de cada objeto en cammelCase
-    2 - Eliminar el ID y el deleted_at
+    1 - Convertir los parametros de cada objeto en cammelCase 
+    2 - Eliminar el ID y el deleted_at + datos sensibles
     3 - hacer parseJSON a todos los campos que se requiera (Empiezan por { o por [ )
     4 - Convierte a fecha todos los campos que acaben en At o contengan "date"
     5 - Convierte en Boolean todos los campos que empiezen por is
     
     Estas normas generales deben ser aplicadas en DB.
 
+    En caso de haber relaciones en los datos recibidos se ejecutará también sobre las relaciones
+
 */
-export const dataRenderer = (data : any) => {
+export const dataRenderer = (data: any): any[] => {
 
     const resultToSend = []
 
-    if(Array.isArray(data)){  
+    if (Array.isArray(data)) {
 
-    for(let row of data){
-        for(let values in row){
-            const newValues = toCamelCase(values);
-            row[newValues] = row[values];
-            delete row[values];
-            values = newValues;
-            
-            if(values === "id" || values === "deletedAt"){
-                delete row[values];
-            }
-            if(typeof row[values] === "string" && row[values].indexOf("{") === 0){
-                row[values] = parseJSONFromLongText(row[values])
-            }
-            if(typeof row[values] === "string" && row[values].indexOf("[") === 0){
-                row[values] = parseJSONFromLongText(row[values])
-            }
-            if((values.endsWith("At") || values.indexOf("date") === 0) && row[values] != null){
-                row[values] = row[values].getTime();
-            }
-            if(values.indexOf("is") === 0){
-                row[values] = !!row[values];
-            }
+        for (let row of data) {
+
+            const toPush = renderObject(row);
+
+            resultToSend.push(toPush);
         }
-        resultToSend.push({row});
+    } else {
+
+        data = renderObject(data);
+
+        resultToSend.push(data);
     }
-}else{
-    for(let values in data){
-
-        const newValues = toCamelCase(values);
-            data[newValues] = data[values];
-            delete data[values];
-            values = newValues;
-
-        if(values === "id" || values === "deletedAt"){
-            delete data[values];
-        }
-        if(typeof data[values] === "string" && data[values].indexOf("{") === 0){
-            data[values] = parseJSONFromLongText(data[values])
-        }
-        if(typeof data[values] === "string" && data[values].indexOf("[") === 0){
-            data[values] = parseJSONFromLongText(data[values])
-        }
-        if((values.endsWith("At") || values.indexOf("date") === 0) && data[values] != null){
-            data[values] = data[values].getTime();
-        }
-        if(values.indexOf("is") === 0){
-            data[values] = !!data[values];
-        }
-    }
-
-    resultToSend.push(data);
-}
 
     return resultToSend;
 }
 
-export function parseJSONFromLongText(value:string|{[x:string]: any}){
-    if(value === "[]"){
+export function parseJSONFromLongText(value: string | { [x: string]: any }) {
+    if (value === "[]") {
         return null;
-    }else if(typeof(value) === "string"){
-        try{
+    } else if (typeof (value) === "string") {
+        try {
             return JSON.parse(value);
-        }catch(err){
+        } catch (err) {
             return value;
         }
-    }else{
+    } else {
         return value;
     }
+}
+
+/*
+    Está función sirve para renderizar los datos. Los datos que puede recibir son un array o un objeto. Dependiendo del tipo
+    de dato inicial que reciba hará una acción u otra para poder tratarlo. Una vez está tratando el tipo de dato principal
+    hara lo siguiente:
+    
+    1 - Convertir los parametros de cada objeto en cammelCase 
+    2 - Eliminar el ID y el deleted_at + datos sensibles
+    3 - hacer parseJSON a todos los campos que se requiera (Empiezan por { o por [ )
+    4 - Convierte a fecha todos los campos que acaben en At o contengan "date"
+    5 - Convierte en Boolean todos los campos que empiezen por is
+    
+    Estas normas generales deben ser aplicadas en DB.
+
+    En caso de haber relaciones en los datos recibidos se ejecutará también sobre las relaciones
+
+*/
+
+function renderObject(data: any) {
+
+    for (let values in data) {
+
+        // Renderizar relaciones de 1 solo
+
+        if (typeof data[values] === "object" && data[values] != null && data[values].key != null && data[values].rendered == null) {
+            const dataSub: any = dataRenderer(data[values]);
+            dataSub.rendered = true;
+            data[values] = dataSub;
+            continue;
+        }
+
+        // Renderizar relaciones de many
+
+        if (Array.isArray(data[values]) && data[values][0] != null && data[values][0].rendered == null) {
+
+            const arrayToPush: any[] = [];
+
+            for (let included of data[values]) {
+                const dataSub: any = dataRenderer(included);
+                dataSub.rendered = true;
+                arrayToPush.push(dataSub);
+            }
+
+
+            data[values] = arrayToPush;
+            continue;
+        }
+
+        if (values !== "key") {
+            const newValues = toCamelCase(values);
+            data[newValues] = data[values];
+            if(newValues !== values)
+                delete data[values];
+            values = newValues;
+        }
+
+        // Elimino información importante generica
+
+        if (values === "id" || values === "deletedAt" || values === "password" || values === "signupWith") {
+            delete data[values];
+        }
+        if (typeof data[values] === "string" && data[values].indexOf("{") === 0) {
+            data[values] = parseJSONFromLongText(data[values])
+        }
+        if (typeof data[values] === "string" && data[values].indexOf("[") === 0) {
+            data[values] = parseJSONFromLongText(data[values])
+        }
+        if ((values.endsWith("At") || values.indexOf("date") === 0) && data[values] != null) {
+            data[values] = data[values].getTime();
+        }
+
+        if (values.endsWith("Id")) {
+            delete data[values];
+        }
+
+        if (values.indexOf("is") === 0) {
+            data[values] = !!data[values];
+        }
+    }
+
+    return data;
 }

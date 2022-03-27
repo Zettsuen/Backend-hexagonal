@@ -71,5 +71,139 @@ model Community {
   deleted_at DateTime?
   temporary_show_v2form Boolean @default(false)
 
+  // Relations
+
+  member Member[]
+  communityMember CommunityMember[]
+
   @@map("communities")
+}
+
+model User {
+  id Int @unique @default(autoincrement())
+  key String @unique
+  registered_at_collective_id Int?
+  stripe_customer_id String?
+  stripe_response String?
+  name String
+  surname String
+  birth DateTime?
+  gender_id Int?
+  is_gdpr_accepted Boolean @default(true)
+  email String @unique
+  email_verified_at DateTime?
+  is_a_representation_of String?
+  representation_validated_at DateTime?
+  domain_id Int?
+  owned_by_account_id Int?
+  username String @unique
+  working_hours_week Int?
+  business_hour_end String?
+  business_hour_start String?
+  password String?
+  temporary_password String?
+  remember_token String?
+  register_token String?
+  email_token String?
+  registration_mail_sent Boolean @default(true)
+  logins Int?
+  last_login DateTime?
+  discovery_done Boolean @default(false)
+  onboarding_done Boolean @default(false)
+  onboarding_step Int?
+  searchability Boolean @default(true)
+  accessibility Int @default(0)
+  url_redirect String?
+  headline String?
+  summary String?
+  language_id Int? @default(15)
+  timezone_id Int? @default(60)
+  profile_url String?
+  background_url String?
+  google_id String?
+  google_photo String?
+  linkedin_id String?
+  linkedin_photo String?
+  experience_version Boolean? @default(false)
+  beta_tester Boolean @default(false)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  deleted_at DateTime?
+
+  // Relations
+
+  member Member[]
+  communityMember CommunityMember[]
+
+  @@map("users")
+}
+
+model Member{
+  id Int @unique @default(autoincrement())
+  key String @unique
+  user_id Int
+  community_id Int
+  type_id Int?
+  subscription_plan_id Int?
+  username String @unique
+  email String
+  password String?
+  signup_with String @default("password")
+  status Int @default(3)
+  name String
+  surname String
+  headline String?
+  summary String?
+  avatar_url String?
+  bg_url String?
+  is_member Boolean @default(true)
+  is_staff Boolean @default(false)
+  is_subscriber Boolean @default(true)
+  is_gdpr_accepted Boolean @default(true)
+  local_id Int
+  custom Json?
+  profile_completion String?
+  logins_count Int? @default(0)
+  last_login DateTime?
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  deleted_at DateTime?
+
+  //References
+
+  user User @relation(fields: [user_id], references: [id])
+  community Community @relation(fields: [community_id], references: [id])
+
+  //Relations
+
+  communityMember CommunityMember[]
+
+  @@map("members")
+
+}
+
+model CommunityMember {
+  id Int @unique @default(autoincrement())
+  key String @unique
+  community_id Int
+  member_id Int
+  user_id Int
+  status Int
+  is_member Boolean @default(true)
+  is_staff Boolean @default(false)
+  is_subscriber Boolean @default(true)
+  subscription_id Int?
+  type_id Int?
+  local_id Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+    //References
+
+  user User @relation(fields: [user_id], references: [id])
+  community Community @relation(fields: [community_id], references: [id])
+  member Member @relation(fields: [member_id], references: [id])
+
+  @@map("community_member")
+
 }
