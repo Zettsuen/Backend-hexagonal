@@ -2,6 +2,9 @@ import bodyParser from "./middlewares/bodyParser";
 import router from "./routes";
 import {Express} from "express";
 import { Authorized } from "./middlewares/authorized";
+import { CORS } from "./middlewares/cors";
+import {Server, Socket} from "socket.io";
+import { Chat } from './controllers/chat';
 const express = require('express');
 const App:Express = express();
 
@@ -19,12 +22,18 @@ App.use((req, res, next) => {
     })
     next();
 });
-
+App.use(CORS);
 App.use(bodyParser);
 App.use(Authorized);
 App.use(router);
 
-App.listen(8011,() => {
+const server = require('http').createServer(App);
+
+// Initialize sockets
+
+new Chat(server);
+
+server.listen(8011,() => {
     console.log("Running at 8011");
 }).on("error", (err:Error) => {
     console.log(err.message);
