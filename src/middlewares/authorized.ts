@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import JWT, { JwtPayload, VerifyOptions } from "jsonwebtoken";
-
+import fs from "fs";
 export interface DecodedJWT {
     sub: any
 }
@@ -24,20 +24,26 @@ export function Authorized(req: Request, res: Response, next: NextFunction) {
                 
                 next();
             } else {
-                const publicKey:JWT.Secret = process.env.PUBLICKEY || ""
+                try{
+                const publicKey = fs.readFileSync(process.env.OAUTH_PK_PATH || "", 'utf8')
+
                 JWT.verify(bearer, publicKey, {
                     algorithms: ["RS256"]
-                } as VerifyOptions, (err, jwt) => {
+                }, (err, jwt) => {
                     if (err != null) {
-                        res.status(403);
+                        console.log(err);
+                        res.setHeader("WWW-Authenticate", "Bearer realm=\"Copernic OAuth\", error=\"invalid_token\"")
+                            .sendStatus(401);
                     } else {
-                        
                         jwt = jwt as DecodedJWT;
                         req.body.userID = jwt.sub;
-                        
-                        next();
                     }
-                })
+                });
+                next();
+            }catch(e){
+                console.log(e);
+                res.sendStatus(500);
+            }
 
             }
 

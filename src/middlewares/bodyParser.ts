@@ -1,42 +1,49 @@
 import { NextFunction, Request, Response } from "express";
 
 const bodyParser = async (req: Request, res: Response, next: NextFunction) => {
-    if(req.headers != null && req.headers["content-type"] === "application/json"){
-        if(["POST", "PUT"].includes(req.method)){
-            try{
+    if (["OPTION", "OPTIONS"].includes(req.method)) {
+        res.json({ ok: true });
+        return;
+    }
 
+    if (req.headers != null && req.headers["content-type"] === "application/json") {
+
+        if (["POST", "PUT"].includes(req.method)) {
+            try {
                 req.body = await collectStream(req);
+
                 next();
 
-            }catch(err){
+            } catch (err) {
                 console.log(err)
                 res.status(400).send("Bad JSON");
                 return;
             }
-        }else{
+        } else {
             res.status(400).send("Invalid request method");
             return;
         }
-    }else if(req.headers && !req.headers["content-type"]){
+    } else if (req.headers && !req.headers["content-type"]) {
         req.body = req.query;
         next();
     }
 }
 
-const collectStream = async (req:Request) => {
+const collectStream = async (req: Request) => {
 
-    const body:Buffer[] = [];
+    return new Promise((resolve, reject) => {
+        const body: Buffer[] = [];
+        req.on("data", (chunck: Buffer) => {
+            body.push(chunck);
+        })
 
-    req.on("data", (chunck:Buffer) => {
-        body.push(chunck);
-    })
+        req.on("end", () => {
+            const parsedBody = JSON.parse(body.toString());
 
-    const parsedBody = req.on("end", () => {
-        const parsedBody = Buffer.concat(body).toString();
-        return parsedBody;
-    })
+            resolve(parsedBody);
+        })
+    });
 
-    return parsedBody;
 }
 
 export default bodyParser;
