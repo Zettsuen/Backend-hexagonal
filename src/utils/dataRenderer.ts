@@ -17,7 +17,7 @@ const { toCamelCase } = require('js-convert-case');
     En caso de haber relaciones en los datos recibidos se ejecutará también sobre las relaciones
 
 */
-export const dataRenderer = (data: any): any[] => {
+export const dataRenderer = (data: any, ignoreCases: boolean = false): any[] => {
 
     const resultToSend = []
 
@@ -25,13 +25,13 @@ export const dataRenderer = (data: any): any[] => {
 
         for (let row of data) {
 
-            const toPush = renderObject(row);
+            const toPush = renderObject(row, ignoreCases);
 
             resultToSend.push(toPush);
         }
     } else {
 
-        data = renderObject(data);
+        data = renderObject(data, ignoreCases);
 
         resultToSend.push(data);
     }
@@ -70,14 +70,14 @@ export function parseJSONFromLongText(value: string | { [x: string]: any }) {
 
 */
 
-function renderObject(data: any) {
+function renderObject(data: any, ignoreCases: boolean = false) {
 
     for (let values in data) {
 
         // Renderizar relaciones de 1 solo
 
         if (typeof data[values] === "object" && data[values] != null && data[values].key != null && data[values].rendered == null) {
-            const dataSub: any = dataRenderer(data[values]);
+            const dataSub: any = dataRenderer(data[values], ignoreCases);
             dataSub.rendered = true;
             data[values] = dataSub;
             continue;
@@ -90,7 +90,7 @@ function renderObject(data: any) {
             const arrayToPush: any[] = [];
 
             for (let included of data[values]) {
-                const dataSub: any = dataRenderer(included);
+                const dataSub: any = dataRenderer(included, ignoreCases);
                 dataSub.rendered = true;
                 arrayToPush.push(dataSub);
             }
@@ -103,14 +103,13 @@ function renderObject(data: any) {
         if (values !== "key") {
             const newValues = toCamelCase(values);
             data[newValues] = data[values];
-            if(newValues !== values)
+            if (newValues !== values)
                 delete data[values];
             values = newValues;
         }
 
         // Elimino información importante generica
-
-        if (values === "id" || values === "deletedAt" || values === "password" || values === "signupWith") {
+        if (!ignoreCases && (values.toLowerCase().includes("id") || values === "deletedAt" || values === "password" || values === "signupWith")) {
             delete data[values];
         }
         if (typeof data[values] === "string" && data[values].indexOf("{") === 0) {
@@ -120,11 +119,9 @@ function renderObject(data: any) {
             data[values] = parseJSONFromLongText(data[values])
         }
         if ((values.endsWith("At") || values.indexOf("date") === 0) && data[values] != null) {
-            data[values] = data[values].getTime();
-        }
-
-        if (values.endsWith("Id")) {
-            delete data[values];
+            try {
+                data[values] = data[values]?.getTime();
+            } catch { }
         }
 
         if (values.indexOf("is") === 0) {
