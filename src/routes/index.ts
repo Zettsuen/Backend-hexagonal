@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { handleGetCommunities } from '../controllers/communities';
 import { handleGetUsers } from '../controllers/users';
 import { handleGetMembers } from '../controllers/members';
+import { handleGetCommunities } from '../controllers/communities';
+import { checkRoleAccess } from '../middlewares/CheckRoleAccess';
 
 const router:Router = Router();
 

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { getMembers } from '../helpers/members';
-import { Communities } from '../services/community/communities';
-import { Members } from '../services/members/members';
+import { Communities } from '../services/communities';
+import { Members } from '../services/members';
 import { dataRenderer } from '../utils/dataRenderer';
 import { getCommunities } from '../helpers/communities';
 
@@ -25,18 +25,14 @@ export async function CheckMember(req: Request, res: Response, next: NextFunctio
 
         const conditionForMember = new Members({ communitySlug: requestData.communitySlug, userID: requestData.userID }).getMembersParams();
 
-        const communityMember = await getMembers(conditionForMember);
+        const communityMember:any = await getMembers(conditionForMember);
 
         if (communityMember[1] < 1) {
             res.sendStatus(403);
             return;
         }
 
-        const conditionForCommunity = new Communities({ communitySlug: requestData.communitySlug }).getCommunityParams();
-
-        const community = dataRenderer((await getCommunities(conditionForCommunity))[0], true);
-
-        req.body.preData = community;
+        req.body.preData = {...req.body.preData, member: (dataRenderer(communityMember[0][0], true))[0]};
 
         next();
 

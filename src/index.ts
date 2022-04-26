@@ -3,8 +3,10 @@ import router from "./routes";
 import {Express} from "express";
 import { Authorized } from "./middlewares/authorized";
 import { CORS } from "./middlewares/cors";
-import {Server, Socket} from "socket.io";
 import { Chat } from './controllers/chat';
+import { CheckMember } from "./middlewares/checkMember";
+import { CheckStaff } from "./middlewares/checkStaff";
+import { Sockets } from "./infrastructure/socketsInit";
 const express = require('express');
 const App:Express = express();
 
@@ -22,16 +24,37 @@ App.use((req, res, next) => {
     })
     next();
 });
+// Initialize CORS
+
 App.use(CORS);
+
+// Use the bodyParser custom
+
 App.use(bodyParser);
-App.use(Authorized);
+
+// Check if the user that requested can access
+
+App.use('/v1/authorized/*', Authorized);
+
+// Check if the user that requeted is member of the resource
+
+App.use('/v1/authorized/memberNeeded/*', CheckMember);
+
+// Check if the user that requested is staff
+
+App.use('/v1/authorized/memberNeeded/onlyStaff/*', CheckStaff);
+
+// Initialize router
+
 App.use(router);
 
 const server = require('http').createServer(App);
 
 // Initialize sockets
 
-new Chat(server);
+const initSockets = new Sockets(server);
+
+new Chat(initSockets.getSocket());
 
 server.listen(8011,() => {
     console.log("Running at 8011");

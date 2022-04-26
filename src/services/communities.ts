@@ -1,4 +1,4 @@
-import { ParamConfigs } from '../Params';
+import { ParamConfigs } from './Params';
 
 export class Communities extends ParamConfigs{
 
@@ -36,6 +36,6 @@ export class Communities extends ParamConfigs{
             this.where.is_course = requestData.isSection;
         }
 
-        return this.returnData();
+        return this.returnGetData();
     }
 }

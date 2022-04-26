@@ -1,4 +1,4 @@
-import { ParamConfigs } from '../Params';
+import { ParamConfigs } from './Params';
 
 export class Users extends ParamConfigs{
 
@@ -20,6 +20,6 @@ export class Users extends ParamConfigs{
             this.where.key = requestData.userKey
         }
 
-        return this.returnData();
+        return this.returnGetData();
     }
 }

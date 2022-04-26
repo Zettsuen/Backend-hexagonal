@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { dataRenderer } from "../utils/dataRenderer";
-import { Members } from '../services/members/members';
+import { Members } from '../services/members';
 import { getMembers } from '../helpers/members';
+import { ExpressErrors } from "../models/errors";
 
 
 export const handleGetMembers = async (req: Request, res: Response) => {
@@ -15,9 +16,15 @@ export const handleGetMembers = async (req: Request, res: Response) => {
 
         res.json({ data: dataRenderer(responseData[0]), total: responseData[1] });
 
-    } catch (err) {
+    } catch (err:any) {
         console.log(err);
-        res.status(500).send("Internal Server Error");
+        if(err instanceof ExpressErrors){
+            res.sendStatus(err.status);
+            return;
+        }
+        console.log(err);
+        res.status(500);
+
     }
 
 }

@@ -1,4 +1,4 @@
-import { ParamConfigs } from '../Params';
+import { ParamConfigs } from './Params';
 
 export class Members extends ParamConfigs{
 
@@ -14,6 +14,7 @@ export class Members extends ParamConfigs{
 
         - memberKey --> Key del miembro
         - communitySlug --> Slug de la comunidad
+        - userID --> ID del usuario
 
         Este metodo incluye el modelo Member para la relación
 
@@ -27,8 +28,12 @@ export class Members extends ParamConfigs{
             this.where.community = {slug: requestData.communitySlug}
         }
 
+        if(requestData.userID != null){
+            this.where.member = {user_id: requestData.userID}
+        }
+
         this.include.member = true;
 
-        return this.returnData();
+        return this.returnGetData();
     }
 }
