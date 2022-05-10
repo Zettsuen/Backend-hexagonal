@@ -24,6 +24,7 @@ App.use((req, res, next) => {
     })
     next();
 });
+
 // Initialize CORS
 
 App.use(CORS);

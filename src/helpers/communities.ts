@@ -6,18 +6,7 @@ export const getCommunities = async (options:any) => {
     
     const result = await prisma.community.findFirst(options);
 
-    const rCount = await prisma.community.count({
-        where: {
-            OR: [
-                {
-                    slug: options.communitySlug
-                },
-                {
-                    key: options.communityKey
-                }
-            ]
-        }
-    });
+    const rCount = await prisma.community.count(options);
     
     return [result, rCount]
 

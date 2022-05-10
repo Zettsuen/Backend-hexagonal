@@ -24,7 +24,7 @@ export async function CheckMember(req: Request, res: Response, next: NextFunctio
         }
 
         const conditionForMember = new Members({ communitySlug: requestData.communitySlug, userID: requestData.userID }).getMembersParams();
-
+        
         const communityMember:any = await getMembers(conditionForMember);
 
         if (communityMember[1] < 1) {

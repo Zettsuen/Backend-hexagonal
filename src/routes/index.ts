@@ -6,8 +6,8 @@ import { checkRoleAccess } from '../middlewares/CheckRoleAccess';
 
 const router:Router = Router();
 
-router.get("/api/v1/communities", handleGetCommunities);
-router.get("/api/v1/users", handleGetUsers);
-router.get("/api/v1/members", handleGetMembers);
+router.get("/v1/authorized/memberNeeded/communities", handleGetCommunities);
+router.get("/v1/authorized/memberNeeded/users", handleGetUsers);
+router.get("/v1/authorized/memberNeeded/members", handleGetMembers);
 
 export default router;

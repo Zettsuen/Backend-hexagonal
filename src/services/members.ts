@@ -24,7 +24,7 @@ export class Members extends ParamConfigs{
             this.where.member = {key: requestData.memberKey}
         }
 
-        if(requestData.memberKey != null){
+        if(requestData.communitySlug != null){
             this.where.community = {slug: requestData.communitySlug}
         }
 
