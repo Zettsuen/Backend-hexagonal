@@ -1,7 +1,4 @@
-import { dataRenderer } from "../utils/dataRenderer";
-import { Members } from "../services/members";
-import { getMembers } from "../helpers/members";
-import { Server, Socket } from "socket.io";
+import { Server} from "socket.io";
 
 
 export class Sockets {
